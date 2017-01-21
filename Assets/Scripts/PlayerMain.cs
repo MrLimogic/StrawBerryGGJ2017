@@ -4,130 +4,59 @@ using System.Collections;
 public class PlayerMain : MonoBehaviour
 {
     //Variables
-    public float playerMovementSpeed = 4f;
-
-    public float playerCurrentStamina = 10f;
-    public float stepSoundWaveSize;
-
-    bool isSneaking = false;
-    bool isWalking = false;
-    bool isSprinting = false;
+    public float playersCurrentSpeed = 0;
+    public float playersCurrentStamina = 100;
+    float playerMacStamina = 100;
+    public int playerLives = 3;
+    public int playerObjectCount = 0;
+    public int playerScore = 0;
 
     //Unity references
-    Rigidbody playerRigidBody;
+    Rigidbody2D playerRigidBody;
     Camera playersGameCamera;
 
 
     // Use this for initialization
     void Start ()
     {
-        playerRigidBody = GetComponent<Rigidbody>();
+        playerRigidBody = GetComponent<Rigidbody2D>();
         playersGameCamera = FindObjectOfType<Camera>();
 
-        StartCoroutine(StaminaWait());
-        StartCoroutine(ConcreteSneak());
-        StartCoroutine(ConcreteWalk());
-        StartCoroutine(ConcreteSprint());
     }
-
-    IEnumerator StaminaWait()
-    {
-        while (true)
-        {
-            Debug.Log("Waited");
-            Debug.Log("Current stamina number is: " + playerCurrentStamina);
-            if (Input.GetButtonDown("Dash") && playerCurrentStamina != 0)
-            {
-                playerCurrentStamina--;
-            }
-
-            yield return new WaitForSeconds(10f);
-
-            Debug.Log("Did it again");
-        }
-    }
-
-	// Update is called once per frame
 	void Update ()
     {
-        PlayerMovement();
-        PlayerUpdate();
+        //PlayerMovement();
 	}
     void FixedUpdate()
     {
-        //
-    }
-
-    void PlayerUpdate()
-    {
-        //Used to update information on the player or play something the player consistantly emits every game tick
+        PlayerMovement();
     }
 
     void PlayerMovement()
     {
+
         //Getting the input Axis for the player
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
+        
 
-        Vector3 playerMovement = new Vector3(horizontal, vertical, 0);
-        playerRigidBody.velocity = playerMovement * playerMovementSpeed;
+        Vector2 playerMovement = new Vector2(horizontal, vertical);
+        playerRigidBody.velocity = playerMovement * playersCurrentSpeed;
 
-        if (Input.GetButtonDown("Sprint"))
+        if (Input.GetKeyDown(KeyCode.E) && (Input.GetButtonDown("Vertical") || Input.GetButtonDown("Horizontal")))
         {
-            playerMovementSpeed += 4;
-            isSprinting = true;
+            Debug.Log("I am sneaking");
+            playersCurrentSpeed = 1;
         }
-        if (Input.GetButtonUp("Sprint"))
+        else if (Input.GetButtonDown("Vertical") || Input.GetButtonDown("Horizontal") || (Input.GetButtonDown("Vertical") && Input.GetButtonDown("Horizontal")))
         {
-            playerMovementSpeed -= 4;
-            isSprinting = false;
+            Debug.Log("Play footsteps");
+            playersCurrentSpeed = 4;
         }
-        if (Input.GetButtonDown("Up") || Input.GetButtonDown("Down") || Input.GetButtonDown("Left") || Input.GetButtonDown("Right") && Input.GetButtonUp("Sprint"))
+        else if (Input.GetButtonUp("Vertical") || Input.GetButtonUp("Horizontal"))
         {
-            isWalking = true;
-        }
-        if (Input.GetButtonUp("Up") && Input.GetButtonUp("Down") && Input.GetButtonUp("Left") && Input.GetButtonUp("Right"))
-        {
-            isWalking = false;
-        }
-    }
-
-    void EmitSound()
-    { 
-        //Emit heavy breathing, walking, or running sounds from the player
-    }
-
-    IEnumerator ConcreteSneak()
-    {
-        while (isSneaking == true)
-        {
-            //play walk sound 1
-            Debug.Log("Playing Sneak sound 1");
-            yield return new WaitForSeconds(1f);
-            //play walk sound 2
-            Debug.Log("Playing Sneak sound 2");
-        }
-    }
-    IEnumerator ConcreteWalk()
-    {
-        while (isWalking == true)
-        {
-            //play walk sound 1
-            Debug.Log("Playing walk sound 1");
-            yield return new WaitForSeconds(1f);
-            //play walk sound 2
-            Debug.Log("Playing walk sound 2");
-        }
-    }
-    IEnumerator ConcreteSprint()
-    {
-        while (isSprinting == true)
-        {
-            //play walk sound 1
-            Debug.Log("Playing Sprint sound 1");
-            yield return new WaitForSeconds(1f);
-            //play walk sound 2
-            Debug.Log("Playing Sprint sound 2");
+            Debug.Log("Don't play footsteps");
+            playersCurrentSpeed = 0;
         }
     }
 }
